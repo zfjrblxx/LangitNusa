@@ -19,5 +19,8 @@
   "devDependencies": {
     "vite": "latest"
   },
-  "description": "Eksplorasi cuaca, lingkungan, gempa, dan aktivitas alam Indonesia berbasis data BMKG."
+  "description": "Eksplorasi cuaca, lingkungan, gempa, dan aktivitas alam Indonesia berbasis data BMKG.",
+  "engines": {
+    "node": "24.x"
+  }
 }
