@@ -146,11 +146,15 @@ export default function App() {
     if (!el) return
 
     if (window.matchMedia('(max-width: 850px)').matches) {
-      // Mobile target: put the actual section heading at y=263px,
-      // immediately below the 66px location header + 48px nav,
-      // with the same breathing room as the reference layout.
+      // IMPORTANT: target the actual H2, not the section wrapper.
+      // The wrapper has top padding, so targeting the section itself leaves
+      // the heading too far down. The reference position puts the H2 just
+      // below the 66px header + 48px horizontal navigation.
+      const heading = el.querySelector('.section-head h2')
+      if (!heading) return
+
       const HEADING_TOP = 263
-      const rect = el.getBoundingClientRect()
+      const rect = heading.getBoundingClientRect()
       const target = Math.max(0, window.scrollY + rect.top - HEADING_TOP)
       window.scrollTo({ top: target, behavior: 'smooth' })
     } else {
