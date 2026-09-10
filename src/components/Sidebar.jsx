@@ -11,7 +11,7 @@ export default function Sidebar({ open, onClose, active, onNavigate }) {
       <div className="mobile-close"><button className="icon-btn" onClick={onClose} aria-label="Tutup menu"><X size={20} /></button></div>
       <div className="logo">Langit<span>Nusa</span></div>
       <nav aria-label="Navigasi utama">{items.map(([id, label]) => <button key={id} className={active === id ? 'active' : ''} onClick={() => { onNavigate(id); onClose() }}>{label}</button>)}</nav>
-      <div className="sidebar-bottom">Sumber: BMKG & Open-Meteo<br />Default · DKI Jakarta — Gambir</div>
+      <div className="sidebar-bottom">Sumber: BMKG & Open-Meteo<br />Default · Jawa Barat — Kota Bandung</div>
     </aside>
     <div className={`backdrop ${open ? 'show' : ''}`} onClick={onClose} />
   </>

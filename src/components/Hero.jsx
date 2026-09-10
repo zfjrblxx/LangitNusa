@@ -12,10 +12,10 @@ export default function Hero({ location, query, setQuery, onSearch, onPick, sugg
     <h1>Melihat Indonesia dari langit dan bumi.</h1>
     <p>Cuaca, gempa, kualitas lingkungan, dan peringatan alam dalam satu ruang yang tenang untuk dibaca.</p>
     <div className="prompt">
-      <div className="prompt-label">Pilih wilayah Indonesia</div>
+      <div className="prompt-label">Cari kota atau kabupaten di Indonesia</div>
       <div className="prompt-row">
         <Search size={18} />
-        <input aria-label="Cari wilayah Indonesia" value={query} onChange={(e) => setQuery(e.target.value)} onKeyDown={(e) => e.key === 'Enter' && onSearch()} placeholder="Cari kota, kabupaten, kecamatan, atau kelurahan..." autoComplete="off" />
+        <input aria-label="Cari wilayah Indonesia" value={query} onChange={(e) => setQuery(e.target.value)} onKeyDown={(e) => e.key === 'Enter' && onSearch()} placeholder="Cari kota atau kabupaten..." autoComplete="off" />
         <button onClick={onSearch}>Cari lokasi</button>
       </div>
       {(searching || suggestions.length > 0) && <div className="suggestions" role="listbox">
@@ -30,7 +30,7 @@ export default function Hero({ location, query, setQuery, onSearch, onPick, sugg
         {!searching && !suggestions.length && query.trim().length >= 2 && <div className="suggestion muted">Wilayah tidak ditemukan.</div>}
       </div>}
       <div className="quick">
-        <button onClick={() => onPick('Gambir')}>Gambir</button>
+        <button onClick={() => onPick('Bandung')}>Bandung</button>
         <button onClick={() => onPick('Kemayoran')}>Kemayoran</button>
         <button onClick={() => onPick('Cilandak')}>Cilandak</button>
         <button onClick={() => onPick('Kebayoran Baru')}>Kebayoran Baru</button>

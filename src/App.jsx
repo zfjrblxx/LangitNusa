@@ -33,6 +33,7 @@ export default function App() {
   const [active, setActive] = useState('overview')
   const [refreshing, setRefreshing] = useState(false)
   const [dark, setDark] = useState(() => localStorage.getItem('langitnusa-theme') === 'dark')
+  const [showAboutData, setShowAboutData] = useState(false)
 
   useEffect(() => {
     document.documentElement.dataset.theme = dark ? 'dark' : ''
@@ -136,6 +137,12 @@ export default function App() {
   }
 
   const nav = (id) => {
+    if (id === 'about-data') {
+      setActive(id)
+      setShowAboutData(true)
+      setOpen(false)
+      return
+    }
     setActive(id)
     document.getElementById(id)?.scrollIntoView({ behavior: 'smooth' })
   }
@@ -173,7 +180,6 @@ export default function App() {
         <MapPanel location={location} quake={quake} earthquakes={earthquakes} weather={weather} />
         <Warning xml={warnings} loading={loadingWarnings} location={location} />
         <Latest quake={quake} location={location} activity={activity} />
-        <AboutData />
         <footer>
           <strong>BMKG (Badan Meteorologi, Klimatologi, dan Geofisika)</strong><br />
           LangitNusa adalah proyek independen. Sumber data aplikasi menggunakan BMKG (Badan Meteorologi, Klimatologi, dan Geofisika) & Open-Meteo. Data aktivitas gunung api menggunakan PVMBG · MAGMA ESDM sesuai sumber resmi yang ditampilkan pada bagian gunung api.
@@ -181,6 +187,7 @@ export default function App() {
         </footer>
       </div>
     </main>
+    <AboutData open={showAboutData} onClose={() => { setShowAboutData(false); setActive('overview') }} />
   </>
 }
 

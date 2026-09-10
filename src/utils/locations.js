@@ -1,6 +1,6 @@
 export const DEFAULT_LOCATION = {
-  name: 'Gambir', city: 'Jakarta Pusat', province: 'DKI Jakarta',
-  lat: -6.1763842693, lon: 106.8267073562, district: 'Gambir', country: 'Indonesia'
+  name: 'Bandung', city: 'Kota Bandung', province: 'Jawa Barat',
+  lat: -6.917464, lon: 107.619123, district: '', country: 'Indonesia'
 }
 
 export const LOCATIONS = [
