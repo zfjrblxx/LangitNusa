@@ -40,7 +40,7 @@ Feed ini merupakan nowcast/peringatan dini cuaca BMKG dan dapat berubah sewaktu-
 https://www.bmkg.go.id/kualitas-udara/pm25
 ```
 
-LangitNusa mengarahkan pengguna ke pemantauan resmi PM2.5 dan tidak membuat angka lokal sendiri ketika endpoint publik lokasi belum terverifikasi.
+LangitNusa mengambil nilai PM2.5 dari halaman pemantauan resmi BMKG melalui proxy server. Aplikasi mencocokkan lokasi pengguna dengan stasiun BMKG terdekat yang tersedia, lalu menampilkan nilai, kategori, waktu pembaruan, dan perkiraan jarak stasiun. Jika tidak tersedia, aplikasi tidak membuat angka pengganti.
 
 ## Volcano
 
@@ -57,3 +57,8 @@ Search wilayah menggunakan package open-source `geografis` sebagai direktori kod
 ## Attribution
 
 BMKG mewajibkan pengguna Data Terbuka BMKG mencantumkan BMKG sebagai sumber data. LangitNusa menampilkan attribution BMKG pada halaman utama.
+
+
+## Skor Kondisi Lingkungan
+
+Skor 0–100 adalah interpretasi LangitNusa. PM2.5 BMKG berbobot 70% dan komponen kenyamanan termal berbasis suhu/kelembapan BMKG berbobot 30%. Skor ini bukan indeks resmi BMKG dan tidak menggantikan informasi kesehatan atau keselamatan resmi.
