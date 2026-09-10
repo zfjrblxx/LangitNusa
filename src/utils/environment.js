@@ -8,6 +8,16 @@ export function pm25Info(pm25) {
   return { label: 'Berbahaya', tone: 'bad' }
 }
 
+export function airQualityScore(pm25) {
+  const value = Number(pm25)
+  if (!Number.isFinite(value)) return null
+  if (value <= 15.5) return Math.round(100 - (value / 15.5) * 10)
+  if (value <= 55.4) return Math.round(90 - ((value - 15.5) / 39.9) * 30)
+  if (value <= 150.4) return Math.round(60 - ((value - 55.4) / 95) * 30)
+  if (value <= 250.4) return Math.round(30 - ((value - 150.4) / 100) * 20)
+  return Math.max(0, Math.round(10 - ((value - 250.4) / 250) * 10))
+}
+
 function pmScore(pm25) {
   const value = Number(pm25)
   if (!Number.isFinite(value)) return null
