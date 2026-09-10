@@ -44,25 +44,52 @@ function category(pm25) {
   return 'Berbahaya'
 }
 
+function cleanText(value) {
+  return value
+    .replace(/<[^>]*>/g, ' ')
+    .replace(/&nbsp;/gi, ' ')
+    .replace(/&amp;/gi, '&')
+    .replace(/\s+/g, ' ')
+    .trim()
+}
+
+// BMKG's PM2.5 index currently renders each station as a rich anchor whose
+// visible text contains the station name plus time/value/category. Match the
+// known station name inside that text rather than requiring exact text.
 function parseStationLinks(html) {
   const links = new Map()
-  const re = /href=["']([^"']*\/kualitas-udara\/pm25\/[^"']+)["'][^>]*>([^<]+)</gi
+  const re = /<a\b[^>]*href=["']([^"']*\/kualitas-udara\/pm25\/[^"']+)["'][^>]*>([\s\S]*?)<\/a>/gi
   let match
+
   while ((match = re.exec(html))) {
-    const href = match[1]
-    const name = match[2].replace(/\s+/g, ' ').trim()
-    if (name) links.set(name.toLowerCase(), new URL(href, 'https://www.bmkg.go.id').toString())
+    const href = new URL(match[1], 'https://www.bmkg.go.id').toString()
+    const text = cleanText(match[2]).toLowerCase()
+    if (!text) continue
+
+    for (const station of STATIONS) {
+      const key = station.name.toLowerCase()
+      if (text.includes(key) && !links.has(key)) {
+        links.set(key, href)
+      }
+    }
   }
+
   return links
 }
 
 function parseDetail(html, fallbackName) {
   const compact = html.replace(/\s+/g, ' ')
-  const valueMatch = compact.match(/([0-9]+(?:[.,][0-9]+)?)\s*µg\/m(?:<sup>)?\s*3/i)
-  const categoryMatch = compact.match(/Kategori:\s*([^<]{2,30})/i)
+
+  // Current BMKG detail pages expose the reading as e.g. "36.8 µg/m^{3}".
+  // We only need the numeric reading before the unit, so the parser remains
+  // tolerant of superscript/HTML formatting changes.
+  const valueMatch = compact.match(/([0-9]+(?:[.,][0-9]+)?)\s*µg\/m/i)
+  const categoryMatch = compact.match(/Kategori:\s*(?:<[^>]+>\s*)*([^<]{2,40})/i)
   const timeMatch = compact.match(/(\d{1,2} \w+ 202\d, \d{1,2}\.\d{2} WIB)/i)
   const pm25 = valueMatch ? Number(valueMatch[1].replace(',', '.')) : NaN
+
   if (!Number.isFinite(pm25)) return null
+
   return {
     pm25,
     category: categoryMatch?.[1]?.trim() || category(pm25),
@@ -74,13 +101,18 @@ function parseDetail(html, fallbackName) {
 export default async function handler(req, res) {
   const lat = Number(req.query?.lat)
   const lon = Number(req.query?.lon)
+
   if (!Number.isFinite(lat) || !Number.isFinite(lon) || Math.abs(lat) > 11 || Math.abs(lon) > 141) {
     return res.status(400).json({ error: 'Valid latitude and longitude are required' })
   }
 
   try {
-    const indexRes = await fetch('https://www.bmkg.go.id/kualitas-udara/pm25', { headers: { 'Accept': 'text/html' } })
+    const indexRes = await fetch('https://www.bmkg.go.id/kualitas-udara/pm25', {
+      headers: { 'Accept': 'text/html' }
+    })
+
     if (!indexRes.ok) throw new Error(`BMKG PM2.5 index ${indexRes.status}`)
+
     const html = await indexRes.text()
     const links = parseStationLinks(html)
 
@@ -92,17 +124,21 @@ export default async function handler(req, res) {
     for (const station of ranked) {
       const url = links.get(station.name.toLowerCase())
       if (!url) continue
+
       const detailRes = await fetch(url, { headers: { 'Accept': 'text/html' } })
       if (!detailRes.ok) continue
+
       const detailHtml = await detailRes.text()
       const parsed = parseDetail(detailHtml, station.name)
-      if (parsed) {
-        return res.status(200).setHeader('Cache-Control', 's-maxage=300, stale-while-revalidate=900').json({
+      if (!parsed) continue
+
+      return res.status(200)
+        .setHeader('Cache-Control', 's-maxage=300, stale-while-revalidate=900')
+        .json({
           ...parsed,
           distanceKm: Math.round(station.distanceKm * 10) / 10,
           source: 'BMKG PM2.5'
         })
-      }
     }
 
     return res.status(404).json({ error: 'No nearby BMKG PM2.5 station data available' })
