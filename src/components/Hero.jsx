@@ -1,5 +1,11 @@
 import { Search, LocateFixed, MapPin, LoaderCircle } from 'lucide-react'
 
+const levelLabel = {
+  city: 'Kota/Kabupaten',
+  district: 'Kecamatan',
+  village: 'Kelurahan/Desa'
+}
+
 export default function Hero({ location, query, setQuery, onSearch, onPick, suggestions, searching }) {
   return <section className="hero" id="overview">
     <div className="bmkg-mark" aria-hidden="true">{Array.from({ length: 8 }).map((_, i) => <i key={i} style={{ transform: `rotate(${i * 22.5}deg)` }} />)}</div>
@@ -9,14 +15,17 @@ export default function Hero({ location, query, setQuery, onSearch, onPick, sugg
       <div className="prompt-label">Pilih wilayah Indonesia</div>
       <div className="prompt-row">
         <Search size={18} />
-        <input aria-label="Cari wilayah Indonesia" value={query} onChange={(e) => setQuery(e.target.value)} onKeyDown={(e) => e.key === 'Enter' && onSearch()} placeholder="Cari desa, kecamatan, kota, atau kode wilayah..." autoComplete="off" />
+        <input aria-label="Cari wilayah Indonesia" value={query} onChange={(e) => setQuery(e.target.value)} onKeyDown={(e) => e.key === 'Enter' && onSearch()} placeholder="Cari kota, kabupaten, kecamatan, atau kelurahan..." autoComplete="off" />
         <button onClick={onSearch}>Cari lokasi</button>
       </div>
       {(searching || suggestions.length > 0) && <div className="suggestions" role="listbox">
         {searching && <div className="suggestion muted"><LoaderCircle className="spin" size={15} /> Mencari wilayah…</div>}
-        {!searching && suggestions.map((item) => <button className="suggestion" key={item.code} onClick={() => onPick(item)} role="option">
+        {!searching && suggestions.map((item) => <button className="suggestion" key={`${item.level}-${item.code}`} onClick={() => onPick(item)} role="option">
           <MapPin size={15} />
-          <span><b>{item.name}</b><small>{item.district} · {item.city} · {item.province}</small></span>
+          <span>
+            <b>{item.name}</b>
+            <small>{levelLabel[item.level] || 'Wilayah'} · {item.cityLabel || item.city} · {item.province}</small>
+          </span>
         </button>)}
         {!searching && !suggestions.length && query.trim().length >= 2 && <div className="suggestion muted">Wilayah tidak ditemukan.</div>}
       </div>}

@@ -115,7 +115,7 @@ export default function App() {
     const normalized = {
       ...hit,
       name: hit.name || hit.village,
-      city: hit.city || hit.kotkab || hit.city,
+      city: hit.city || hit.cityLabel || hit.kotkab || hit.city,
       province: hit.province,
       district: hit.district || hit.kecamatan,
       code: hit.code,
