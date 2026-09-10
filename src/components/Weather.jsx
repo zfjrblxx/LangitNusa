@@ -7,7 +7,7 @@ export default function Weather({ data, location, loading, error }) {
   const score = activityScore(items.slice(0, 8))
   return <>
     <section className="section" id="weather">
-      <SectionHead title="Kondisi saat ini" note={loading ? 'Memuat data BMKG…' : `${location.name} · ${timeWIB(first?.local_datetime)}`} />
+      <SectionHead title="Kondisi saat ini" note={loading ? 'Memuat data Open-Meteo…' : `${location.name} · ${timeWIB(first?.local_datetime)}`} />
       <div className="current">
         <div className="current-main">
           {error ? <div className="error">Data cuaca sementara tidak tersedia. Coba perbarui data.</div> : <>
@@ -28,7 +28,7 @@ export default function Weather({ data, location, loading, error }) {
       </div>
     </section>
     <section className="section" id="forecast">
-      <SectionHead title="Prakiraan cuaca" note="Per 3 jam · BMKG" />
+      <SectionHead title="Prakiraan cuaca" note="Per 3 jam · Open-Meteo" />
       <div className="forecast">{items.slice(0, 8).map((x, i) => <div className="forecast-item" key={`${x.local_datetime}-${i}`}>
         <span>{timeWIB(x.local_datetime)}</span><strong>{weatherIcon(x.weather_desc)}</strong><b>{x.t ?? '—'}°</b><small>{x.weather_desc || '—'}</small>
         <em>{x.tp != null ? `${x.tp} mm` : '—'}</em>

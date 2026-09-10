@@ -1,6 +1,5 @@
-const directWeather = (adm4) => `https://api.bmkg.go.id/publik/prakiraan-cuaca?adm4=${encodeURIComponent(adm4)}`
 const endpoints = {
-  weather: (adm4) => `/api/weather?adm4=${encodeURIComponent(adm4)}`,
+  weather: (lat, lon) => `/api/weather?lat=${encodeURIComponent(lat)}&lon=${encodeURIComponent(lon)}`,
   earthquake: '/api/earthquake',
   earthquakes: '/api/earthquakes',
   warnings: '/api/warnings',
@@ -22,8 +21,8 @@ async function tryUrls(urls, parse) {
   throw last || new Error('Request failed')
 }
 
-export function getWeather(adm4) {
-  return tryUrls([endpoints.weather(adm4), directWeather(adm4)])
+export function getWeather(lat, lon) {
+  return request(endpoints.weather(lat, lon))
 }
 
 export function getLatestEarthquake() {

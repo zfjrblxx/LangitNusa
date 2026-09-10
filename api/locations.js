@@ -1,28 +1,15 @@
-import * as geografisPkg from 'geografis'
+const API = 'https://geocoding-api.open-meteo.com/v1/search'
 
-const geografis = geografisPkg?.default || geografisPkg
-
-function cleanCity(value = '') {
-  return String(value)
-    .replace(/^Kota Adm\.\s*/i, '')
-    .replace(/^Kabupaten\s+/i, 'Kab. ')
-    .replace(/^Kab\.\s*/i, 'Kab. ')
-    .trim()
+function levelOf(item) {
+  const code = String(item?.feature_code || '').toUpperCase()
+  if (/PPLC|PPLA|PPLA2|PPLA3|PPLA4|PPL/.test(code)) return 'city'
+  if (item?.admin3) return 'district'
+  if (item?.admin4) return 'village'
+  return 'city'
 }
 
-function normalize(item, level, name) {
-  return {
-    name,
-    level,
-    village: item.village,
-    district: item.district,
-    city: item.city,
-    cityLabel: cleanCity(item.city),
-    province: item.province,
-    code: item.code,
-    lat: Number(item.latitude),
-    lon: Number(item.longitude)
-  }
+function cityLabel(item) {
+  return item?.admin2 || item?.admin1 || item?.country || ''
 }
 
 export default async function handler(req, res) {
@@ -30,49 +17,29 @@ export default async function handler(req, res) {
   if (q.length < 2) return res.status(400).json({ error: 'q must contain at least 2 characters' })
 
   try {
-    // Search the village directory, then collapse matching records into
-    // city/district/village choices so searches behave like a location picker
-    // rather than returning many nearly identical villages.
-    const result = geografis.search(q, 40, 0)
-    const rows = (result?.data || []).filter((item) => item?.code && Number.isFinite(Number(item.latitude)) && Number.isFinite(Number(item.longitude)))
-    const query = q.toLowerCase()
-    const output = []
-    const seen = new Set()
+    const url = `${API}?name=${encodeURIComponent(q)}&count=10&language=id&format=json&countryCode=ID`
+    const response = await fetch(url, { headers: { accept: 'application/json' } })
+    if (!response.ok) throw new Error(`Open-Meteo geocoding ${response.status}`)
+    const json = await response.json()
+    const rows = Array.isArray(json?.results) ? json.results : []
 
-    const add = (key, value) => {
-      if (!value || seen.has(key)) return
-      seen.add(key)
-      output.push(value)
-    }
-
-    // Prefer an exact/strong city match first.
-    rows.forEach((item) => {
-      const city = String(item.city || '')
-      if (city.toLowerCase().includes(query)) {
-        const cityLabel = cleanCity(city)
-        add(`city:${city.toLowerCase()}`, normalize(item, 'city', cityLabel))
-      }
-    })
-
-    // Then districts, useful for searches such as Gambir, Menteng, Cilandak.
-    rows.forEach((item) => {
-      const district = String(item.district || '')
-      if (district.toLowerCase().includes(query)) {
-        add(`district:${district.toLowerCase()}:${item.city}`, normalize(item, 'district', district))
-      }
-    })
-
-    // Finally keep direct village/kelurahan matches.
-    rows.forEach((item) => {
-      const village = String(item.village || '')
-      if (village.toLowerCase().includes(query)) {
-        add(`village:${village.toLowerCase()}:${item.district}:${item.city}`, normalize(item, 'village', village))
-      }
-    })
+    const data = rows.map((item) => ({
+      name: item.name,
+      level: levelOf(item),
+      city: item.admin2 || item.admin1 || item.name,
+      cityLabel: cityLabel(item),
+      province: item.admin1 || '',
+      district: item.admin3 || '',
+      village: item.admin4 || '',
+      code: String(item.id || `${item.latitude},${item.longitude}`),
+      lat: Number(item.latitude),
+      lon: Number(item.longitude),
+      country: item.country || 'Indonesia'
+    })).filter((item) => Number.isFinite(item.lat) && Number.isFinite(item.lon))
 
     res.setHeader('Cache-Control', 's-maxage=86400, stale-while-revalidate=604800')
-    return res.status(200).json({ data: output.slice(0, 8) })
+    return res.status(200).json({ data })
   } catch (error) {
-    return res.status(500).json({ error: 'Location directory is temporarily unavailable' })
+    return res.status(502).json({ error: 'Open-Meteo location search is temporarily unavailable' })
   }
 }

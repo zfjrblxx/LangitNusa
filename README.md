@@ -2,21 +2,21 @@
 
 **Melihat Indonesia dari langit dan bumi.**
 
-LangitNusa adalah web interface editorial untuk mengeksplorasi cuaca, prakiraan, gempa bumi, kualitas udara, peringatan dini, dan konteks aktivitas alam Indonesia dengan **Data Terbuka BMKG sebagai sumber utama**.
+LangitNusa adalah web interface editorial untuk mengeksplorasi cuaca, prakiraan, gempa bumi, kualitas udara, peringatan dini, dan konteks aktivitas alam Indonesia dengan **BMKG & Open-Meteo sebagai satu-satunya sumber data**.
 
 > LangitNusa adalah proyek independen. BMKG merupakan sumber data dan attribution, bukan pemilik atau operator LangitNusa.
 
 ## ✨ Features
 
-- 🌤️ Kondisi cuaca berdasarkan kode wilayah BMKG
+- 🌤️ Kondisi cuaca berbasis koordinat dari Open-Meteo
 - 🕒 Prakiraan cuaca per 3 jam hingga 3 hari
 - 🌡️ Suhu, kelembapan, angin, visibilitas, awan, dan curah hujan
-- 🔎 Search wilayah Indonesia berbasis direktori kode wilayah
+- 🔎 Search wilayah Indonesia berbasis Open-Meteo Geocoding
 - 🌎 Peta interaktif dengan layer lokasi, gempa, dan prakiraan lokasi
 - 🌏 Daftar 15 gempa M5.0+ terbaru BMKG pada peta
 - ⚠️ Feed peringatan dini cuaca BMKG
-- 🌫️ PM2.5 BMKG dari stasiun terdekat yang tersedia
-- 🌋 Konteks gunung api dengan rujukan PVMBG/MAGMA
+- 🌫️ US AQI dan parameter polutan dari Open-Meteo Air Quality
+
 - 🧭 Kesiapan aktivitas sebagai interpretasi sederhana dari prakiraan cuaca
 - 🌙 Light & dark mode
 - 📱 Responsive desktop dan mobile
@@ -37,22 +37,22 @@ Desain mengambil inspirasi dari prinsip editorial modern, tetapi tidak menyalin 
 
 ## 📡 Data Sources
 
+> **Sumber Data Resmi: BMKG (Badan Meteorologi, Klimatologi, dan Geofisika) & Open-Meteo.**
+
+
 Sumber utama:
 
 - [BMKG Open Data](https://data.bmkg.go.id/)
-- [Prakiraan Cuaca BMKG](https://data.bmkg.go.id/prakiraan-cuaca/)
+- [Open-Meteo Weather API](https://open-meteo.com/en/docs)
 - [Data Gempabumi BMKG](https://data.bmkg.go.id/gempabumi/)
 - [Peringatan Dini Cuaca BMKG](https://data.bmkg.go.id/peringatan-dini-cuaca/)
-- [PM2.5 BMKG](https://www.bmkg.go.id/kualitas-udara/pm25)
-- [MAGMA Indonesia / PVMBG](https://magma.esdm.go.id/) untuk rujukan aktivitas vulkanik
+- [Open-Meteo Air Quality API](https://open-meteo.com/en/docs/air-quality-api)
 
 BMKG menyatakan bahwa pemanfaat Data Terbuka BMKG wajib mencantumkan BMKG sebagai sumber data. LangitNusa menampilkan attribution tersebut di interface.
 
 ## 🧭 Search Wilayah
 
-Endpoint cuaca publik BMKG menggunakan kode wilayah administrasi tingkat IV (`adm4`). Karena itu LangitNusa memakai direktori wilayah lokal di server untuk mengubah pencarian nama menjadi kode wilayah sebelum meminta prakiraan BMKG.
-
-Direktori pencarian menggunakan package open-source `geografis` sebagai indeks wilayah. Data tersebut bukan dataset cuaca BMKG; kode wilayah hanya digunakan sebagai jembatan menuju endpoint cuaca BMKG.
+Pencarian lokasi menggunakan Open-Meteo Geocoding API. Koordinat hasil pencarian langsung dipakai untuk meminta data cuaca dan kualitas udara Open-Meteo.
 
 ## 🗺️ Peta
 
@@ -62,19 +62,18 @@ Peta menggunakan Leaflet + OpenStreetMap. Layer yang tersedia:
 2. **Gempa terbaru** — hingga 15 kejadian M5.0+ dari feed BMKG.
 3. **Prakiraan lokasi** — kondisi prakiraan pada lokasi terpilih.
 
-Titik prakiraan tidak dimaksudkan sebagai sebaran spasial cuaca; data cuaca BMKG memang dikirim berdasarkan lokasi administrasi yang dipilih.
+Titik prakiraan hanya memvisualisasikan kondisi pada koordinat lokasi terpilih, bukan sebaran spasial cuaca.
 
 ## ⚠️ Data Integrity
 
 LangitNusa tidak mengarang nilai ketika sumber publik yang sesuai belum tersedia.
 
-- Cuaca dan gempa: data live dari endpoint BMKG melalui proxy Vercel.
-- Peringatan dini: feed nowcast BMKG.
-- PM2.5: diambil dari halaman pemantauan BMKG; LangitNusa memilih stasiun terdekat dari direktori stasiun yang tersedia. Jika tidak ada data stasiun yang cocok, nilai tidak dibuat-buat.
-- Gunung api: bukan dataset cuaca BMKG pada aplikasi ini; status harus diverifikasi melalui PVMBG/MAGMA.
-- **Kesiapan aktivitas**: interpretasi aplikasi berdasarkan hujan, petir, dan angin; bukan indeks resmi BMKG.
+- Cuaca dan kualitas udara: data live dari Open-Meteo melalui proxy Vercel.
+- Gempa dan peringatan dini: data resmi BMKG melalui proxy Vercel.
+- Pencarian lokasi: Open-Meteo Geocoding API.
+- **Kesiapan aktivitas**: interpretasi aplikasi berdasarkan data BMKG/Open-Meteo; bukan indeks resmi.
 
-Untuk keputusan keselamatan, selalu prioritaskan informasi resmi dari BMKG/PVMBG dan otoritas terkait.
+Untuk keputusan keselamatan, selalu prioritaskan informasi terbaru dari kanal resmi BMKG dan sumber resmi Open-Meteo yang digunakan aplikasi.
 
 ## 🏗️ Project Structure
 
@@ -140,7 +139,7 @@ npm run preview
 
 ## 📍 Default Location
 
-**DKI Jakarta — Gambir** (`31.71.01.1001`).
+**DKI Jakarta — Gambir**.
 
 ## ☁️ Vercel
 
@@ -148,9 +147,9 @@ Project ini tidak lagi menetapkan `runtime` Function secara manual di `vercel.js
 
 ## 📜 Attribution
 
-**BMKG — Badan Meteorologi, Klimatologi, dan Geofisika**
+**Sumber Data Resmi: BMKG (Badan Meteorologi, Klimatologi, dan Geofisika) & Open-Meteo.**
 
-LangitNusa merupakan proyek independen dan tidak berafiliasi dengan BMKG.
+LangitNusa merupakan proyek independen dan tidak berafiliasi dengan BMKG atau Open-Meteo.
 
 ## 📄 License
 
@@ -159,4 +158,4 @@ Lihat [LICENSE](LICENSE).
 
 ## Skor kondisi lingkungan
 
-LangitNusa menghitung **Skor Kondisi Lingkungan** 0–100 sebagai interpretasi aplikasi, bukan indeks resmi BMKG. Skor menggunakan PM2.5 BMKG sebagai komponen utama (70%) dan kenyamanan termal sederhana dari suhu/kelembapan BMKG (30%). Kesiapan aktivitas menggunakan PM2.5 dan kondisi cuaca saat ini.
+LangitNusa menampilkan **US AQI dari Open-Meteo** beserta PM2.5, PM10, NO₂, SO₂, O₃, dan CO. Kesiapan aktivitas merupakan interpretasi aplikasi dari data cuaca dan kualitas udara, bukan indeks resmi BMKG/Open-Meteo.

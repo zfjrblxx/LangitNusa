@@ -5,14 +5,13 @@ import Hero from './components/Hero'
 import Weather from './components/Weather'
 import Environment from './components/Environment'
 import Earthquake from './components/Earthquake'
-import Volcano from './components/Volcano'
 import MapPanel from './components/MapPanel'
 import Warning from './components/Warning'
 import AboutData from './components/AboutData'
 import { DEFAULT_LOCATION, findLocation } from './utils/locations'
 import { getWeather, getLatestEarthquake, getEarthquakes, getWarnings, searchLocations, getAirQuality } from './services/bmkg'
 import { activityScore } from './utils/format'
-import { environmentScore, scoreInfo, activityFromEnvironment } from './utils/environment'
+import { aqiInfo, activityFromEnvironment } from './utils/environment'
 
 export default function App() {
   const [location, setLocation] = useState(DEFAULT_LOCATION)
@@ -66,7 +65,7 @@ export default function App() {
     setWeatherError(false)
     setAirQuality(null)
     Promise.allSettled([
-      getWeather(location.code),
+      getWeather(location.lat, location.lon),
       getAirQuality(location.lat, location.lon)
     ]).then(([weatherResult, airResult]) => {
       if (!live) return
@@ -98,15 +97,14 @@ export default function App() {
   const activity = useMemo(() => activityScore(weather?.items?.slice(0, 8) || []), [weather])
   const firstWeather = weather?.items?.[0]
   const environment = useMemo(() => {
-    const score = environmentScore({ pm25: airQuality?.pm25, temp: firstWeather?.t, humidity: firstWeather?.hu })
-    const info = scoreInfo(score)
+    const info = aqiInfo(airQuality?.aqi)
     const activities = activityFromEnvironment({
-      pm25: airQuality?.pm25,
+      aqi: airQuality?.aqi,
       temp: firstWeather?.t,
       humidity: firstWeather?.hu,
       weather: firstWeather?.weather_desc
     })
-    return { score, ...info, activities }
+    return { aqi: airQuality?.aqi, ...info, activities }
   }, [airQuality, firstWeather])
 
   const choose = (item) => {
@@ -115,10 +113,9 @@ export default function App() {
     const normalized = {
       ...hit,
       name: hit.name || hit.village,
-      city: hit.city || hit.cityLabel || hit.kotkab || hit.city,
+      city: hit.city || hit.cityLabel || hit.city,
       province: hit.province,
       district: hit.district || hit.kecamatan,
-      code: hit.code,
       lat: Number(hit.lat ?? hit.latitude),
       lon: Number(hit.lon ?? hit.longitude)
     }
@@ -145,7 +142,7 @@ export default function App() {
     setRefreshing(true)
     try {
       await Promise.all([
-        getWeather(location.code).then((d) => setWeather(normalizeWeather(d))).catch(() => setWeatherError(true)),
+        getWeather(location.lat, location.lon).then((d) => setWeather(normalizeWeather(d))).catch(() => setWeatherError(true)),
         getAirQuality(location.lat, location.lon).then(setAirQuality).catch(() => setAirQuality(null)),
         loadHazards()
       ])
@@ -170,15 +167,14 @@ export default function App() {
         <Weather data={weather} location={location} loading={loadingWeather} error={weatherError} />
         <Environment activity={activity} environment={environment} airQuality={airQuality} loading={loadingAir} weather={firstWeather} />
         <Earthquake quake={quake} loading={loadingQuake} />
-        <Volcano location={location} />
         <MapPanel location={location} quake={quake} earthquakes={earthquakes} weather={weather} />
         <Warning xml={warnings} loading={loadingWarnings} location={location} />
         <Latest quake={quake} location={location} activity={activity} />
         <AboutData />
         <footer>
           <strong>BMKG (Badan Meteorologi, Klimatologi, dan Geofisika)</strong><br />
-          LangitNusa adalah proyek independen yang memanfaatkan Data Terbuka BMKG. Untuk informasi keselamatan dan keputusan penting, selalu prioritaskan kanal resmi BMKG.
-          <a href="https://data.bmkg.go.id/" target="_blank" rel="noreferrer">Data Terbuka BMKG <ExternalLink size={12} /></a>
+          LangitNusa adalah proyek independen. Sumber data aplikasi dibatasi pada BMKG (Badan Meteorologi, Klimatologi, dan Geofisika) & Open-Meteo.
+          <span className="footer-sources"><a href="https://data.bmkg.go.id/" target="_blank" rel="noreferrer">BMKG <ExternalLink size={12} /></a> · <a href="https://open-meteo.com/" target="_blank" rel="noreferrer">Open-Meteo <ExternalLink size={12} /></a></span>
         </footer>
       </div>
     </main>
@@ -186,9 +182,7 @@ export default function App() {
 }
 
 function normalizeWeather(d) {
-  const groups = d?.data?.[0]?.cuaca || []
-  const items = groups.flat()
-  return { location: d?.lokasi || d?.data?.[0]?.lokasi, items }
+  return { location: d?.location, items: Array.isArray(d?.items) ? d.items : [] }
 }
 
 function normalizeEarthquakes(d) {
