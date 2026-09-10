@@ -1,4 +1,4 @@
-const MAGMA_URL = 'https://magma.esdm.go.id/'
+const MAGMA_URL = 'https://magma.esdm.go.id/v1/gunung-api/tingkat-aktivitas'
 
 const VOLCANOES = [
   ['Gede', 'Jawa Barat', 2958, -6.78, 106.98, 'Stratovolcano', 'Cianjur · Sukabumi · Bogor'],
@@ -68,44 +68,37 @@ function parseStatuses(html) {
     .replace(/[ \t]+/g, ' ')
     .replace(/\n[ \t]+/g, '\n')
 
-  // MAGMA's public page may contain HTML elements/entities between the
-  // level number, dash, and label. Use tolerant heading patterns rather
-  // than exact literal strings.
-  const headings = [
-    { level: 4, label: 'Awas', pattern: /Level\s*IV\s*[-–—]?\s*\(\s*Awas\s*\)/i },
-    { level: 3, label: 'Siaga', pattern: /Level\s*III\s*[-–—]?\s*\(\s*Siaga\s*\)/i },
-    { level: 2, label: 'Waspada', pattern: /Level\s*II\s*[-–—]?\s*\(\s*Waspada\s*\)/i },
-    { level: 1, label: 'Normal', pattern: /Level\s*I\s*[-–—]?\s*\(\s*Normal\s*\)/i }
+  // Use MAGMA's dedicated Tingkat Aktivitas page. It has four explicit
+  // sections, so status is assigned only from the section that contains
+  // the volcano name. No default-to-Normal fallback is allowed.
+  const sections = [
+    { level: 4, label: 'Awas', start: /Level\s*IV\s*\(\s*Awas\s*\)/i, end: /Level\s*III\s*\(\s*Siaga\s*\)/i },
+    { level: 3, label: 'Siaga', start: /Level\s*III\s*\(\s*Siaga\s*\)/i, end: /Level\s*II\s*\(\s*Waspada\s*\)/i },
+    { level: 2, label: 'Waspada', start: /Level\s*II\s*\(\s*Waspada\s*\)/i, end: /Level\s*I\s*\(\s*Normal\s*\)/i },
+    { level: 1, label: 'Normal', start: /Level\s*I\s*\(\s*Normal\s*\)/i, end: null }
   ]
 
-  const positions = []
-  for (const heading of headings) {
-    const match = heading.pattern.exec(text)
-    if (match) positions.push({ ...heading, index: match.index })
-  }
-  positions.sort((a, b) => a.index - b.index)
-
   const statusMap = {}
-  for (let i = 0; i < positions.length; i += 1) {
-    const current = positions[i]
-    const end = positions[i + 1]?.index ?? text.length
-    const block = text.slice(current.index, end)
+  for (const section of sections) {
+    const startMatch = section.start.exec(text)
+    if (!startMatch) continue
+    const endMatch = section.end ? section.end.exec(text.slice(startMatch.index + startMatch[0].length)) : null
+    const endIndex = endMatch
+      ? startMatch.index + startMatch[0].length + endMatch.index
+      : text.length
+    const block = text.slice(startMatch.index, endIndex)
     const normalizedBlock = normalize(block)
 
     for (const volcano of VOLCANOES) {
       const normalizedName = normalize(volcano[0])
-      if (!normalizedName) continue
-      // Search the normalized level block directly. This avoids failures
-      // caused by HTML tags, punctuation, or line breaks around the name.
-      if (normalizedBlock.includes(normalizedName)) {
-        statusMap[normalizedName] = { level: current.level, label: current.label }
+      if (normalizedName && normalizedBlock.includes(normalizedName)) {
+        statusMap[normalizedName] = { level: section.level, label: section.label }
       }
     }
   }
 
   return statusMap
 }
-
 export default async function handler(req, res) {
   try {
     const response = await fetch(MAGMA_URL, { headers: { 'User-Agent': 'LangitNusa/1.0' } })
@@ -119,7 +112,7 @@ export default async function handler(req, res) {
       status: statusMap[normalize(name)] || { level: null, label: 'Belum terbaca' },
       distance: Number.isFinite(lat) && Number.isFinite(lon) ? distanceKm(lat, lon, vlat, vlon) : null
     })).sort((a, b) => (a.distance ?? Infinity) - (b.distance ?? Infinity))
-    res.setHeader('Cache-Control', 's-maxage=300, stale-while-revalidate=600')
+    res.setHeader('Cache-Control', 's-maxage=60, stale-while-revalidate=300')
     res.status(200).json({ source: 'PVMBG · MAGMA ESDM', sourceUrl: MAGMA_URL, updatedAt: new Date().toISOString(), items: sorted.slice(0, 3) })
   } catch (error) {
     res.status(502).json({ error: 'Data aktivitas gunung dari MAGMA belum dapat diambil.', source: 'PVMBG · MAGMA ESDM' })
