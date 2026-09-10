@@ -15,7 +15,7 @@ LangitNusa adalah web interface editorial untuk mengeksplorasi cuaca, prakiraan,
 - 🌎 Peta interaktif dengan layer lokasi, gempa, dan prakiraan lokasi
 - 🌏 Daftar 15 gempa M5.0+ terbaru BMKG pada peta
 - ⚠️ Feed peringatan dini cuaca BMKG
-- 🌫️ Informasi pemantauan PM2.5 resmi BMKG
+- 🌫️ PM2.5 BMKG dari stasiun terdekat yang tersedia
 - 🌋 Konteks gunung api dengan rujukan PVMBG/MAGMA
 - 🧭 Kesiapan aktivitas sebagai interpretasi sederhana dari prakiraan cuaca
 - 🌙 Light & dark mode
@@ -70,7 +70,7 @@ LangitNusa tidak mengarang nilai ketika sumber publik yang sesuai belum tersedia
 
 - Cuaca dan gempa: data live dari endpoint BMKG melalui proxy Vercel.
 - Peringatan dini: feed nowcast BMKG.
-- PM2.5: ditautkan ke pemantauan resmi BMKG karena endpoint lokasi publik yang stabil belum dipastikan untuk semua wilayah.
+- PM2.5: diambil dari halaman pemantauan BMKG; LangitNusa memilih stasiun terdekat dari direktori stasiun yang tersedia. Jika tidak ada data stasiun yang cocok, nilai tidak dibuat-buat.
 - Gunung api: bukan dataset cuaca BMKG pada aplikasi ini; status harus diverifikasi melalui PVMBG/MAGMA.
 - **Kesiapan aktivitas**: interpretasi aplikasi berdasarkan hujan, petir, dan angin; bukan indeks resmi BMKG.
 
@@ -155,3 +155,8 @@ LangitNusa merupakan proyek independen dan tidak berafiliasi dengan BMKG.
 ## 📄 License
 
 Lihat [LICENSE](LICENSE).
+
+
+## Skor kondisi lingkungan
+
+LangitNusa menghitung **Skor Kondisi Lingkungan** 0–100 sebagai interpretasi aplikasi, bukan indeks resmi BMKG. Skor menggunakan PM2.5 BMKG sebagai komponen utama (70%) dan kenyamanan termal sederhana dari suhu/kelembapan BMKG (30%). Kesiapan aktivitas menggunakan PM2.5 dan kondisi cuaca saat ini.
