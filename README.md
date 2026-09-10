@@ -37,7 +37,7 @@ Desain mengambil inspirasi dari prinsip editorial modern, tetapi tidak menyalin 
 
 ## 📡 Data Sources
 
-> **Sumber Data Resmi: BMKG (Badan Meteorologi, Klimatologi, dan Geofisika) & Open-Meteo.**
+> **Sumber Data Resmi: BMKG (Badan Meteorologi, Klimatologi, dan Geofisika) & Open-Meteo; khusus aktivitas gunung api menggunakan PVMBG · MAGMA ESDM.**
 
 
 Sumber utama:
@@ -147,7 +147,7 @@ Project ini tidak lagi menetapkan `runtime` Function secara manual di `vercel.js
 
 ## 📜 Attribution
 
-**Sumber Data Resmi: BMKG (Badan Meteorologi, Klimatologi, dan Geofisika) & Open-Meteo.**
+**Sumber Data Resmi: BMKG (Badan Meteorologi, Klimatologi, dan Geofisika) & Open-Meteo; khusus aktivitas gunung api menggunakan PVMBG · MAGMA ESDM.**
 
 LangitNusa merupakan proyek independen dan tidak berafiliasi dengan BMKG atau Open-Meteo.
 

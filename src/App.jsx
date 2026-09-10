@@ -173,8 +173,8 @@ export default function App() {
         <AboutData />
         <footer>
           <strong>BMKG (Badan Meteorologi, Klimatologi, dan Geofisika)</strong><br />
-          LangitNusa adalah proyek independen. Sumber data aplikasi dibatasi pada BMKG (Badan Meteorologi, Klimatologi, dan Geofisika) & Open-Meteo.
-          <span className="footer-sources"><a href="https://data.bmkg.go.id/" target="_blank" rel="noreferrer">BMKG <ExternalLink size={12} /></a> · <a href="https://open-meteo.com/" target="_blank" rel="noreferrer">Open-Meteo <ExternalLink size={12} /></a></span>
+          LangitNusa adalah proyek independen. Sumber data aplikasi menggunakan BMKG (Badan Meteorologi, Klimatologi, dan Geofisika), Open-Meteo, serta PVMBG · MAGMA ESDM khusus data aktivitas gunung api.
+          <span className="footer-sources"><a href="https://data.bmkg.go.id/" target="_blank" rel="noreferrer">BMKG <ExternalLink size={12} /></a> · <a href="https://open-meteo.com/" target="_blank" rel="noreferrer">Open-Meteo <ExternalLink size={12} /></a> · <a href="https://magma.esdm.go.id/" target="_blank" rel="noreferrer">PVMBG · MAGMA <ExternalLink size={12} /></a></span>
         </footer>
       </div>
     </main>

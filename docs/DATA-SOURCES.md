@@ -1,6 +1,6 @@
 # Sumber Data LangitNusa
 
-> **Sumber Data Resmi: BMKG (Badan Meteorologi, Klimatologi, dan Geofisika) & Open-Meteo.**
+> **Sumber Data Resmi: BMKG (Badan Meteorologi, Klimatologi, dan Geofisika) & Open-Meteo; khusus aktivitas gunung api menggunakan PVMBG · MAGMA ESDM.**
 
 LangitNusa membatasi sumber data informasional pada dua penyedia tersebut. Tidak ada data cuaca, kualitas udara, gempa, atau peringatan yang diambil dari layanan pihak ketiga lain.
 
