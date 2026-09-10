@@ -1,0 +1,7 @@
+import {MapContainer,TileLayer,Marker,Popup,CircleMarker} from 'react-leaflet'
+import L from 'leaflet'
+import {SectionHead} from './Weather'
+import {Map as MapIcon} from 'lucide-react'
+const icon=L.divIcon({className:'quake-marker',html:'<span></span>',iconSize:[16,16],iconAnchor:[8,8]})
+export default function MapPanel({location,quake}){const g=quake?.Infogempa?.gempa;let lat=location.lat,lon=location.lon;if(g?.Lintang&&g?.Bujur){lat=parseFloat(String(g.Lintang).replace('LS','').replace('LU',''));if(String(g.Lintang).includes('LS'))lat=-lat;lon=parseFloat(String(g.Bujur).replace('BT','').replace('BB',''));if(String(g.Bujur).includes('BB'))lon=-lon}
+ return <section className="section" id="map"><SectionHead title="Peta sebaran" note="Cuaca · lokasi · gempa"/><div className="map-wrap"><MapContainer center={[location.lat,location.lon]} zoom={7} scrollWheelZoom={false} className="map"><TileLayer attribution='&copy; OpenStreetMap contributors' url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"/><CircleMarker center={[location.lat,location.lon]} radius={7} pathOptions={{color:'#418db8',fillColor:'#79bfe1',fillOpacity:.9}}><Popup>{location.city} · {location.name}</Popup></CircleMarker>{g&&Number.isFinite(lat)&&Number.isFinite(lon)&&<Marker position={[lat,lon]} icon={icon}><Popup><strong>Gempa terbaru · M {g.Magnitude}</strong><br/>{g.Wilayah}</Popup></Marker>}</MapContainer><div className="map-overlay"><MapIcon size={14}/> Data lokasi & gempa</div></div></section>}

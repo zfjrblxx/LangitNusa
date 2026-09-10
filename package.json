@@ -1,0 +1,23 @@
+{
+  "name": "langitnusa",
+  "private": true,
+  "version": "1.0.0",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview"
+  },
+  "dependencies": {
+    "@vitejs/plugin-react": "latest",
+    "leaflet": "latest",
+    "lucide-react": "latest",
+    "react": "latest",
+    "react-dom": "latest",
+    "react-leaflet": "latest"
+  },
+  "devDependencies": {
+    "vite": "latest"
+  },
+  "description": "Eksplorasi cuaca, lingkungan, gempa, dan aktivitas alam Indonesia berbasis data BMKG."
+}
