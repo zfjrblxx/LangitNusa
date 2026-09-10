@@ -8,9 +8,7 @@ const levelLabel = {
 
 export default function Hero({ location, query, setQuery, onSearch, onPick, suggestions, searching }) {
   return <section className="hero" id="overview">
-    <div className="bmkg-mark" aria-hidden="true">{Array.from({ length: 8 }).map((_, i) => <i key={i} style={{ transform: `rotate(${i * 22.5}deg)` }} />)}</div>
     <h1>LangitNusa</h1>
-    <p>Cuaca, gempa, kualitas lingkungan, dan peringatan alam dalam satu ruang yang tenang untuk dibaca.</p>
     <div className="prompt">
       <div className="prompt-label">Cari kota atau kabupaten di Indonesia</div>
       <div className="prompt-row">
