@@ -146,13 +146,22 @@ export default function App() {
     if (!el) return
 
     if (window.matchMedia('(max-width: 850px)').matches) {
-      // Keep the section heading visible below the 66px header + 48px nav.
-      // The mobile section itself has 63px top padding, so 205px gives
-      // the same visual position as a natural scroll into the section.
-      const target = Math.max(0, el.getBoundingClientRect().top + window.scrollY - 205)
-      window.scrollTo({ top: target, behavior: 'smooth' })
+      // Mobile: place the selected section heading at a fixed visual anchor
+      // just below the sticky location header + horizontal navigation.
+      // The browser UI is outside the page viewport, so the page target is
+      // deliberately based on the in-page header/nav height.
+      const anchorTop = 156
+      const scrollToSection = () => {
+        const rect = el.getBoundingClientRect()
+        const target = Math.max(0, window.scrollY + rect.top - anchorTop)
+        window.scrollTo({ top: target, behavior: 'smooth' })
+      }
+
+      requestAnimationFrame(() => {
+        requestAnimationFrame(scrollToSection)
+      })
     } else {
-      el.scrollIntoView({ behavior: 'smooth' })
+      el.scrollIntoView({ behavior: 'smooth', block: 'start' })
     }
   }
 
