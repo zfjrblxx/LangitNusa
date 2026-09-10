@@ -146,10 +146,13 @@ export default function App() {
     if (!el) return
 
     if (window.matchMedia('(max-width: 850px)').matches) {
-      // CSS scroll-margin-top controls the exact visual landing position.
-      // This avoids guessing document offsets and keeps the section heading
-      // consistently below the mobile header/navigation.
-      el.scrollIntoView({ behavior: 'smooth', block: 'start' })
+      // Mobile target: put the actual section heading at y=263px,
+      // immediately below the 66px location header + 48px nav,
+      // with the same breathing room as the reference layout.
+      const HEADING_TOP = 263
+      const rect = el.getBoundingClientRect()
+      const target = Math.max(0, window.scrollY + rect.top - HEADING_TOP)
+      window.scrollTo({ top: target, behavior: 'smooth' })
     } else {
       el.scrollIntoView({ behavior: 'smooth', block: 'start' })
     }
