@@ -10,8 +10,9 @@ import MapPanel from './components/MapPanel'
 import Warning from './components/Warning'
 import AboutData from './components/AboutData'
 import { DEFAULT_LOCATION, findLocation } from './utils/locations'
-import { getWeather, getLatestEarthquake, getEarthquakes, getWarnings, searchLocations } from './services/bmkg'
+import { getWeather, getLatestEarthquake, getEarthquakes, getWarnings, searchLocations, getAirQuality } from './services/bmkg'
 import { activityScore } from './utils/format'
+import { environmentScore, scoreInfo, activityFromEnvironment } from './utils/environment'
 
 export default function App() {
   const [location, setLocation] = useState(DEFAULT_LOCATION)
@@ -19,6 +20,8 @@ export default function App() {
   const [suggestions, setSuggestions] = useState([])
   const [searching, setSearching] = useState(false)
   const [weather, setWeather] = useState(null)
+  const [airQuality, setAirQuality] = useState(null)
+  const [loadingAir, setLoadingAir] = useState(true)
   const [quake, setQuake] = useState(null)
   const [earthquakes, setEarthquakes] = useState([])
   const [warnings, setWarnings] = useState('')
@@ -59,11 +62,22 @@ export default function App() {
   useEffect(() => {
     let live = true
     setLoadingWeather(true)
+    setLoadingAir(true)
     setWeatherError(false)
-    getWeather(location.code)
-      .then((d) => live && setWeather(normalizeWeather(d)))
-      .catch(() => live && setWeatherError(true))
-      .finally(() => live && setLoadingWeather(false))
+    setAirQuality(null)
+    Promise.allSettled([
+      getWeather(location.code),
+      getAirQuality(location.lat, location.lon)
+    ]).then(([weatherResult, airResult]) => {
+      if (!live) return
+      if (weatherResult.status === 'fulfilled') setWeather(normalizeWeather(weatherResult.value))
+      else setWeatherError(true)
+      if (airResult.status === 'fulfilled') setAirQuality(airResult.value)
+    }).finally(() => {
+      if (!live) return
+      setLoadingWeather(false)
+      setLoadingAir(false)
+    })
     return () => { live = false }
   }, [location])
 
@@ -82,6 +96,18 @@ export default function App() {
   useEffect(() => { loadHazards() }, [])
 
   const activity = useMemo(() => activityScore(weather?.items?.slice(0, 8) || []), [weather])
+  const firstWeather = weather?.items?.[0]
+  const environment = useMemo(() => {
+    const score = environmentScore({ pm25: airQuality?.pm25, temp: firstWeather?.t, humidity: firstWeather?.hu })
+    const info = scoreInfo(score)
+    const activities = activityFromEnvironment({
+      pm25: airQuality?.pm25,
+      temp: firstWeather?.t,
+      humidity: firstWeather?.hu,
+      weather: firstWeather?.weather_desc
+    })
+    return { score, ...info, activities }
+  }, [airQuality, firstWeather])
 
   const choose = (item) => {
     const hit = typeof item === 'string' ? findLocation(item) : item
@@ -120,6 +146,7 @@ export default function App() {
     try {
       await Promise.all([
         getWeather(location.code).then((d) => setWeather(normalizeWeather(d))).catch(() => setWeatherError(true)),
+        getAirQuality(location.lat, location.lon).then(setAirQuality).catch(() => setAirQuality(null)),
         loadHazards()
       ])
     } finally {
@@ -141,7 +168,7 @@ export default function App() {
       <div className="content">
         <Hero location={location} query={query} setQuery={setQuery} onSearch={search} onPick={choose} suggestions={suggestions} searching={searching} />
         <Weather data={weather} location={location} loading={loadingWeather} error={weatherError} />
-        <Environment activity={activity} />
+        <Environment activity={activity} environment={environment} airQuality={airQuality} loading={loadingAir} weather={firstWeather} />
         <Earthquake quake={quake} loading={loadingQuake} />
         <Volcano location={location} />
         <MapPanel location={location} quake={quake} earthquakes={earthquakes} weather={weather} />
