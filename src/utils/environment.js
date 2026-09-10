@@ -28,3 +28,16 @@ export function activityFromEnvironment({ aqi, temp, humidity, weather }) {
     ventilation: Number.isFinite(a) && a > 100 ? 'Tutup jendela' : 'Buka jendela'
   }
 }
+
+
+export function readinessInfo({ aqi, temp, humidity, weather }) {
+  const a = Number(aqi), t = Number(temp), h = Number(humidity)
+  const text = String(weather || '').toLowerCase()
+  if ((Number.isFinite(a) && a > 200) || /petir|hujan lebat|hujan beku lebat/.test(text) || (Number.isFinite(t) && t >= 35)) {
+    return { label: 'Hindari', tone: 'bad', detail: 'Kondisi saat ini kurang aman untuk aktivitas luar ruang.' }
+  }
+  if ((Number.isFinite(a) && a > 100) || /hujan|petir/.test(text) || (Number.isFinite(t) && t >= 33) || (Number.isFinite(h) && h >= 85)) {
+    return { label: 'Waspada', tone: 'warn', detail: 'Perhatikan kualitas udara dan kondisi cuaca sebelum beraktivitas di luar.' }
+  }
+  return { label: 'Baik', tone: 'good', detail: 'Kondisi saat ini relatif mendukung aktivitas luar ruang.' }
+}

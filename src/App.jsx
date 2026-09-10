@@ -12,7 +12,7 @@ import Volcano from './components/Volcano'
 import { DEFAULT_LOCATION, findLocation } from './utils/locations'
 import { getWeather, getLatestEarthquake, getEarthquakes, getWarnings, searchLocations, getAirQuality } from './services/bmkg'
 import { activityScore } from './utils/format'
-import { aqiInfo, activityFromEnvironment } from './utils/environment'
+import { aqiInfo, activityFromEnvironment, readinessInfo } from './utils/environment'
 
 export default function App() {
   const [location, setLocation] = useState(DEFAULT_LOCATION)
@@ -105,7 +105,8 @@ export default function App() {
       humidity: firstWeather?.hu,
       weather: firstWeather?.weather_desc
     })
-    return { aqi: airQuality?.aqi, ...info, activities }
+    const readiness = readinessInfo({ aqi: airQuality?.aqi, temp: firstWeather?.t, humidity: firstWeather?.hu, weather: firstWeather?.weather_desc })
+    return { aqi: airQuality?.aqi, ...info, activities, readiness }
   }, [airQuality, firstWeather])
 
   const choose = (item) => {
@@ -165,7 +166,7 @@ export default function App() {
       </header>
       <div className="content">
         <Hero location={location} query={query} setQuery={setQuery} onSearch={search} onPick={choose} suggestions={suggestions} searching={searching} />
-        <Weather data={weather} location={location} loading={loadingWeather} error={weatherError} />
+        <Weather data={weather} location={location} loading={loadingWeather} error={weatherError} readiness={environment.readiness} />
         <Environment activity={activity} environment={environment} airQuality={airQuality} loading={loadingAir} weather={firstWeather} />
         <Volcano location={location} />
         <Earthquake quake={quake} loading={loadingQuake} />

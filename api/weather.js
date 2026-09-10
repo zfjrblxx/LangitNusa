@@ -34,7 +34,8 @@ function buildItems(hourly) {
       wd: Number.isFinite(Number(hourly.wind_direction_10m?.[i])) ? `${Math.round(hourly.wind_direction_10m[i])}°` : null,
       vs_text: formatVisibility(hourly.visibility?.[i]),
       tcc: hourly.cloud_cover?.[i],
-      tp: hourly.precipitation?.[i]
+      tp: hourly.precipitation?.[i],
+      pressure: hourly.surface_pressure?.[i]
     })
   }
   return pick
@@ -48,7 +49,7 @@ export default async function handler(req, res) {
   try {
     const params = new URLSearchParams({
       latitude: String(lat), longitude: String(lon),
-      hourly: 'temperature_2m,relative_humidity_2m,weather_code,wind_speed_10m,wind_direction_10m,cloud_cover,precipitation,visibility',
+      hourly: 'temperature_2m,relative_humidity_2m,weather_code,wind_speed_10m,wind_direction_10m,cloud_cover,precipitation,visibility,surface_pressure',
       forecast_days: '3', timezone: 'Asia/Jakarta'
     })
     const response = await fetch(`${API}?${params}`, { headers: { accept: 'application/json' } })
