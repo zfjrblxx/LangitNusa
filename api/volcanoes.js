@@ -68,29 +68,37 @@ function parseStatuses(html) {
     .replace(/[ \t]+/g, ' ')
     .replace(/\n[ \t]+/g, '\n')
 
+  // MAGMA's public page may contain HTML elements/entities between the
+  // level number, dash, and label. Use tolerant heading patterns rather
+  // than exact literal strings.
   const headings = [
-    { level: 4, label: 'Awas', marker: 'Level IV - (Awas)' },
-    { level: 3, label: 'Siaga', marker: 'Level III - (Siaga)' },
-    { level: 2, label: 'Waspada', marker: 'Level II - (Waspada)' },
-    { level: 1, label: 'Normal', marker: 'Level I - (Normal)' }
+    { level: 4, label: 'Awas', pattern: /Level\s*IV\s*[-–—]?\s*\(\s*Awas\s*\)/i },
+    { level: 3, label: 'Siaga', pattern: /Level\s*III\s*[-–—]?\s*\(\s*Siaga\s*\)/i },
+    { level: 2, label: 'Waspada', pattern: /Level\s*II\s*[-–—]?\s*\(\s*Waspada\s*\)/i },
+    { level: 1, label: 'Normal', pattern: /Level\s*I\s*[-–—]?\s*\(\s*Normal\s*\)/i }
   ]
 
-  const statusMap = {}
-  const positions = headings
-    .map((h) => ({ ...h, index: text.toLowerCase().indexOf(h.marker.toLowerCase()) }))
-    .filter((h) => h.index >= 0)
-    .sort((a, b) => a.index - b.index)
+  const positions = []
+  for (const heading of headings) {
+    const match = heading.pattern.exec(text)
+    if (match) positions.push({ ...heading, index: match.index })
+  }
+  positions.sort((a, b) => a.index - b.index)
 
+  const statusMap = {}
   for (let i = 0; i < positions.length; i += 1) {
     const current = positions[i]
     const end = positions[i + 1]?.index ?? text.length
     const block = text.slice(current.index, end)
+    const normalizedBlock = normalize(block)
+
     for (const volcano of VOLCANOES) {
-      const name = normalize(volcano[0])
-      if (!name) continue
-      const pattern = new RegExp(`(?:^|\\s)${name.replace(/ /g, '\\s+')}(?:\\s|$)`, 'i')
-      if (pattern.test(normalize(block))) {
-        statusMap[name] = { level: current.level, label: current.label }
+      const normalizedName = normalize(volcano[0])
+      if (!normalizedName) continue
+      // Search the normalized level block directly. This avoids failures
+      // caused by HTML tags, punctuation, or line breaks around the name.
+      if (normalizedBlock.includes(normalizedName)) {
+        statusMap[normalizedName] = { level: current.level, label: current.label }
       }
     }
   }
