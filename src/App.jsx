@@ -146,20 +146,10 @@ export default function App() {
     if (!el) return
 
     if (window.matchMedia('(max-width: 850px)').matches) {
-      // Mobile: place the selected section heading at a fixed visual anchor
-      // just below the sticky location header + horizontal navigation.
-      // The browser UI is outside the page viewport, so the page target is
-      // deliberately based on the in-page header/nav height.
-      const anchorTop = 156
-      const scrollToSection = () => {
-        const rect = el.getBoundingClientRect()
-        const target = Math.max(0, window.scrollY + rect.top - anchorTop)
-        window.scrollTo({ top: target, behavior: 'smooth' })
-      }
-
-      requestAnimationFrame(() => {
-        requestAnimationFrame(scrollToSection)
-      })
+      // CSS scroll-margin-top controls the exact visual landing position.
+      // This avoids guessing document offsets and keeps the section heading
+      // consistently below the mobile header/navigation.
+      el.scrollIntoView({ behavior: 'smooth', block: 'start' })
     } else {
       el.scrollIntoView({ behavior: 'smooth', block: 'start' })
     }
