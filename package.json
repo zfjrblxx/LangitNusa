@@ -14,7 +14,8 @@
     "lucide-react": "latest",
     "react": "latest",
     "react-dom": "latest",
-    "react-leaflet": "latest"
+    "react-leaflet": "latest",
+    "geografis": "1.3.2"
   },
   "devDependencies": {
     "vite": "latest"
