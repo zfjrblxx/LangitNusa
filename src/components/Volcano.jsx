@@ -22,7 +22,7 @@ export default function Volcano({ location }) {
   useEffect(() => {
     let live = true
     setLoading(true)
-    fetch(`/api/volcanoes?lat=${encodeURIComponent(location?.lat)}&lon=${encodeURIComponent(location?.lon)}`)
+    fetch(`/api/volcanoes?lat=${encodeURIComponent(location?.lat)}&lon=${encodeURIComponent(location?.lon)}&_=${Date.now()}`, { cache: 'no-store' })
       .then((r) => { if (!r.ok) throw new Error('MAGMA unavailable'); return r.json() })
       .then((d) => { if (live) setData(d) })
       .catch(() => { if (live) setData(null) })
@@ -32,7 +32,7 @@ export default function Volcano({ location }) {
 
   const volcano = data?.items?.[0]
   const status = volcano?.status
-  const statusText = status?.label || 'Belum tersedia'
+  const statusText = status?.label || 'Belum terbaca'
   const statusTone = statusClass(status?.level)
 
   return <section className="section" id="volcano">
@@ -43,7 +43,7 @@ export default function Volcano({ location }) {
           <span className="volcano-mark"><Mountain size={20} /></span>
           <div><strong>Aktivitas Gunung Api</strong><small>Data resmi PVMBG · MAGMA ESDM</small></div>
         </div>
-        <span className={`volcano-level ${statusTone}`}>{loading ? 'Memuat…' : `LEVEL ${status?.level || '—'} · ${statusText}`}</span>
+        <span className={`volcano-level ${statusTone}`}>{loading ? 'Memuat…' : status?.level ? `LEVEL ${status.level} · ${statusText}` : statusText}</span>
       </div>
 
       {loading ? <div className="volcano-loading">Mengambil status aktivitas dari MAGMA Indonesia…</div> : volcano ? <>

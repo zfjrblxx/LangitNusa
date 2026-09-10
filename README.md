@@ -1,6 +1,6 @@
 # LangitNusa
 
-**Melihat Indonesia dari langit dan bumi.**
+**LangitNusa**
 
 LangitNusa adalah web interface editorial untuk mengeksplorasi cuaca, prakiraan, gempa bumi, kualitas udara, peringatan dini, dan konteks aktivitas alam Indonesia dengan **BMKG & Open-Meteo sebagai satu-satunya sumber data**.
 
@@ -159,3 +159,6 @@ Lihat [LICENSE](LICENSE).
 ## Skor kondisi lingkungan
 
 LangitNusa menampilkan **US AQI dari Open-Meteo** beserta PM2.5, PM10, NO₂, SO₂, O₃, dan CO. Kesiapan aktivitas merupakan interpretasi aplikasi dari data cuaca dan kualitas udara, bukan indeks resmi BMKG/Open-Meteo.
+
+### Status gunung api
+Status Level I–IV dibaca dari halaman resmi MAGMA Indonesia "Tingkat Aktivitas Gunung Api". Tidak ada fallback otomatis ke Normal ketika status gagal dibaca.

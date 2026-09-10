@@ -68,32 +68,51 @@ function parseStatuses(html) {
     .replace(/[ \t]+/g, ' ')
     .replace(/\n[ \t]+/g, '\n')
 
-  // Use MAGMA's dedicated Tingkat Aktivitas page. It has four explicit
-  // sections, so status is assigned only from the section that contains
-  // the volcano name. No default-to-Normal fallback is allowed.
-  const sections = [
-    { level: 4, label: 'Awas', start: /Level\s*IV\s*\(\s*Awas\s*\)/i, end: /Level\s*III\s*\(\s*Siaga\s*\)/i },
-    { level: 3, label: 'Siaga', start: /Level\s*III\s*\(\s*Siaga\s*\)/i, end: /Level\s*II\s*\(\s*Waspada\s*\)/i },
-    { level: 2, label: 'Waspada', start: /Level\s*II\s*\(\s*Waspada\s*\)/i, end: /Level\s*I\s*\(\s*Normal\s*\)/i },
-    { level: 1, label: 'Normal', start: /Level\s*I\s*\(\s*Normal\s*\)/i, end: null }
+  // MAGMA's page is a human-facing HTML table. Instead of assuming fixed
+  // section boundaries, locate every Level heading and then associate each
+  // volcano name with the nearest preceding heading. This keeps the parser
+  // correct even when MAGMA changes the spacing, wrappers, or descriptions.
+  const headings = [
+    { level: 4, label: 'Awas', re: /Level\s*IV\s*\(\s*Awas\s*\)/ig },
+    { level: 3, label: 'Siaga', re: /Level\s*III\s*\(\s*Siaga\s*\)/ig },
+    { level: 2, label: 'Waspada', re: /Level\s*II\s*\(\s*Waspada\s*\)/ig },
+    { level: 1, label: 'Normal', re: /Level\s*I\s*\(\s*Normal\s*\)/ig }
   ]
 
-  const statusMap = {}
-  for (const section of sections) {
-    const startMatch = section.start.exec(text)
-    if (!startMatch) continue
-    const endMatch = section.end ? section.end.exec(text.slice(startMatch.index + startMatch[0].length)) : null
-    const endIndex = endMatch
-      ? startMatch.index + startMatch[0].length + endMatch.index
-      : text.length
-    const block = text.slice(startMatch.index, endIndex)
-    const normalizedBlock = normalize(block)
+  const markers = []
+  for (const heading of headings) {
+    for (const match of text.matchAll(heading.re)) {
+      markers.push({ index: match.index, level: heading.level, label: heading.label })
+    }
+  }
+  markers.sort((a, b) => a.index - b.index)
 
-    for (const volcano of VOLCANOES) {
-      const normalizedName = normalize(volcano[0])
-      if (normalizedName && normalizedBlock.includes(normalizedName)) {
-        statusMap[normalizedName] = { level: section.level, label: section.label }
-      }
+  const statusMap = {}
+
+  for (const volcano of VOLCANOES) {
+    const normalizedName = normalize(volcano[0])
+    if (!normalizedName) continue
+
+    const namePattern = new RegExp(`(?:^|\\n|\\s)${normalizedName.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}(?:\\s|\\n|$)`, 'i')
+    const nameMatch = namePattern.exec(text)
+    if (!nameMatch) continue
+
+    // If a name occurs more than once, use the occurrence that has the
+    // closest valid Level heading before it.
+    let cursor = 0
+    let best = null
+    while (cursor < text.length) {
+      const remaining = text.slice(cursor)
+      const match = namePattern.exec(remaining)
+      if (!match) break
+      const absolute = cursor + match.index
+      const preceding = markers.filter((marker) => marker.index <= absolute).at(-1)
+      if (preceding) best = preceding
+      cursor = absolute + Math.max(match[0].length, 1)
+    }
+
+    if (best) {
+      statusMap[normalizedName] = { level: best.level, label: best.label }
     }
   }
 
@@ -112,7 +131,8 @@ export default async function handler(req, res) {
       status: statusMap[normalize(name)] || { level: null, label: 'Belum terbaca' },
       distance: Number.isFinite(lat) && Number.isFinite(lon) ? distanceKm(lat, lon, vlat, vlon) : null
     })).sort((a, b) => (a.distance ?? Infinity) - (b.distance ?? Infinity))
-    res.setHeader('Cache-Control', 's-maxage=60, stale-while-revalidate=300')
+    res.setHeader('Cache-Control', 'no-store, no-cache, must-revalidate, proxy-revalidate, max-age=0')
+    res.setHeader('Pragma', 'no-cache')
     res.status(200).json({ source: 'PVMBG · MAGMA ESDM', sourceUrl: MAGMA_URL, updatedAt: new Date().toISOString(), items: sorted.slice(0, 3) })
   } catch (error) {
     res.status(502).json({ error: 'Data aktivitas gunung dari MAGMA belum dapat diambil.', source: 'PVMBG · MAGMA ESDM' })

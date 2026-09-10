@@ -38,3 +38,6 @@ LangitNusa membatasi sumber data informasional pada dua penyedia tersebut. Tidak
 2. Jika data tidak tersedia, LangitNusa menampilkan status tidak tersedia dan tidak membuat angka pengganti.
 3. Interpretasi kesiapan aktivitas dibuat oleh aplikasi berdasarkan data dari dua sumber tersebut dan bukan indeks resmi.
 4. Peta dasar adalah elemen visual pemetaan, bukan sumber data cuaca atau kualitas udara.
+
+### Aktivitas gunung api
+Status Level I–IV dibaca dari halaman resmi MAGMA Indonesia "Tingkat Aktivitas Gunung Api". LangitNusa tidak menetapkan atau menebak level sendiri. Jika status resmi tidak berhasil dibaca, UI menampilkan "Belum terbaca".
