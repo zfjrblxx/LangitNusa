@@ -8,6 +8,7 @@ import Earthquake from './components/Earthquake'
 import MapPanel from './components/MapPanel'
 import Warning from './components/Warning'
 import AboutData from './components/AboutData'
+import Volcano from './components/Volcano'
 import { DEFAULT_LOCATION, findLocation } from './utils/locations'
 import { getWeather, getLatestEarthquake, getEarthquakes, getWarnings, searchLocations, getAirQuality } from './services/bmkg'
 import { activityScore } from './utils/format'
@@ -166,6 +167,7 @@ export default function App() {
         <Hero location={location} query={query} setQuery={setQuery} onSearch={search} onPick={choose} suggestions={suggestions} searching={searching} />
         <Weather data={weather} location={location} loading={loadingWeather} error={weatherError} />
         <Environment activity={activity} environment={environment} airQuality={airQuality} loading={loadingAir} weather={firstWeather} />
+        <Volcano location={location} />
         <Earthquake quake={quake} loading={loadingQuake} />
         <MapPanel location={location} quake={quake} earthquakes={earthquakes} weather={weather} />
         <Warning xml={warnings} loading={loadingWarnings} location={location} />
@@ -173,7 +175,7 @@ export default function App() {
         <AboutData />
         <footer>
           <strong>BMKG (Badan Meteorologi, Klimatologi, dan Geofisika)</strong><br />
-          LangitNusa adalah proyek independen. Sumber data aplikasi menggunakan BMKG (Badan Meteorologi, Klimatologi, dan Geofisika), Open-Meteo, serta PVMBG · MAGMA ESDM khusus data aktivitas gunung api.
+          LangitNusa adalah proyek independen. Sumber data aplikasi menggunakan BMKG (Badan Meteorologi, Klimatologi, dan Geofisika) & Open-Meteo. Data aktivitas gunung api menggunakan PVMBG · MAGMA ESDM sesuai sumber resmi yang ditampilkan pada bagian gunung api.
           <span className="footer-sources"><a href="https://data.bmkg.go.id/" target="_blank" rel="noreferrer">BMKG <ExternalLink size={12} /></a> · <a href="https://open-meteo.com/" target="_blank" rel="noreferrer">Open-Meteo <ExternalLink size={12} /></a> · <a href="https://magma.esdm.go.id/" target="_blank" rel="noreferrer">PVMBG · MAGMA <ExternalLink size={12} /></a></span>
         </footer>
       </div>

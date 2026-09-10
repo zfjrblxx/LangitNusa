@@ -1,8 +1,8 @@
 import { X } from 'lucide-react'
 
 const items = [
-  ['overview', 'Ringkasan'], ['weather', 'Cuaca'], ['forecast', 'Prakiraan'], ['earthquake', 'Gempa bumi'],
-  ['air', 'Kualitas udara'], ['map', 'Peta sebaran'], ['warning', 'Peringatan dini'], ['latest', 'Aktivitas terbaru'], ['about-data', 'Tentang data']
+  ['overview', 'Ringkasan'], ['weather', 'Cuaca'], ['forecast', 'Prakiraan'], ['air', 'Kualitas udara'], ['volcano', 'Gunung api'], ['earthquake', 'Gempa bumi'],
+  ['map', 'Peta sebaran'], ['warning', 'Peringatan dini'], ['latest', 'Aktivitas terbaru'], ['about-data', 'Tentang data']
 ]
 
 export default function Sidebar({ open, onClose, active, onNavigate }) {
