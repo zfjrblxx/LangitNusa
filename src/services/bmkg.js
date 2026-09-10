@@ -4,7 +4,8 @@ const endpoints = {
   earthquake: '/api/earthquake',
   earthquakes: '/api/earthquakes',
   warnings: '/api/warnings',
-  locations: (q) => `/api/locations?q=${encodeURIComponent(q)}`
+  locations: (q) => `/api/locations?q=${encodeURIComponent(q)}`,
+  airQuality: (lat, lon) => `/api/air-quality?lat=${encodeURIComponent(lat)}&lon=${encodeURIComponent(lon)}`
 }
 
 async function request(url, parse = (r) => r.json()) {
@@ -39,4 +40,8 @@ export function getWarnings() {
 
 export function searchLocations(query) {
   return request(endpoints.locations(query))
+}
+
+export function getAirQuality(lat, lon) {
+  return request(endpoints.airQuality(lat, lon))
 }
