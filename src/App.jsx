@@ -8,6 +8,7 @@ import Earthquake from './components/Earthquake'
 import Volcano from './components/Volcano'
 import MapPanel from './components/MapPanel'
 import Warning from './components/Warning'
+import AboutData from './components/AboutData'
 import { DEFAULT_LOCATION, findLocation } from './utils/locations'
 import { getWeather, getLatestEarthquake, getEarthquakes, getWarnings, searchLocations } from './services/bmkg'
 import { activityScore } from './utils/format'
@@ -146,6 +147,7 @@ export default function App() {
         <MapPanel location={location} quake={quake} earthquakes={earthquakes} weather={weather} />
         <Warning xml={warnings} loading={loadingWarnings} location={location} />
         <Latest quake={quake} location={location} activity={activity} />
+        <AboutData />
         <footer>
           <strong>BMKG (Badan Meteorologi, Klimatologi, dan Geofisika)</strong><br />
           LangitNusa adalah proyek independen yang memanfaatkan Data Terbuka BMKG. Untuk informasi keselamatan dan keputusan penting, selalu prioritaskan kanal resmi BMKG.
