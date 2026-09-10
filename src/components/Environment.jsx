@@ -65,13 +65,6 @@ export default function Environment({ environment, airQuality, loading, weather 
       </div>
     </div>
 
-    <div className="environment-metrics">
-      <Metric icon={<Sun />} label="Suhu" value={weather?.t != null ? weather.t : '—'} unit="°C" />
-      <Metric icon={<Droplets />} label="Kelembapan" value={weather?.hu != null ? weather.hu : '—'} unit="%" />
-      <Metric icon={<Gauge />} label="Angin" value={weather?.ws != null ? weather.ws : '—'} unit="km/j" />
-      <Metric icon={<Wind />} label="PM2.5" value={value(airQuality?.pm25)} unit="µg/m³" />
-    </div>
-
     <div className="activity-block">
       <div className="activity-heading">
         <div>
