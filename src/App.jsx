@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from 'react'
-import { SunMoon, Activity, ExternalLink, Search, RefreshCw } from 'lucide-react'
+import { Menu, SunMoon, Activity, ExternalLink, Search, RefreshCw } from 'lucide-react'
 import Sidebar from './components/Sidebar'
 import Hero from './components/Hero'
 import Weather from './components/Weather'
@@ -29,6 +29,7 @@ export default function App() {
   const [loadingQuake, setLoadingQuake] = useState(true)
   const [loadingWarnings, setLoadingWarnings] = useState(true)
   const [weatherError, setWeatherError] = useState(false)
+  const [open, setOpen] = useState(false)
   const [active, setActive] = useState('overview')
   const [refreshing, setRefreshing] = useState(false)
   const [dark, setDark] = useState(() => localStorage.getItem('langitnusa-theme') === 'dark')
@@ -139,27 +140,11 @@ export default function App() {
     if (id === 'about-data') {
       setActive(id)
       setShowAboutData(true)
+      setOpen(false)
       return
     }
     setActive(id)
-    const el = document.getElementById(id)
-    if (!el) return
-
-    if (window.matchMedia('(max-width: 850px)').matches) {
-      // IMPORTANT: target the actual H2, not the section wrapper.
-      // The wrapper has top padding, so targeting the section itself leaves
-      // the heading too far down. The reference position puts the H2 just
-      // below the 66px header + 48px horizontal navigation.
-      const heading = el.querySelector('.section-head h2')
-      if (!heading) return
-
-      const HEADING_TOP = 263
-      const rect = heading.getBoundingClientRect()
-      const target = Math.max(0, window.scrollY + rect.top - HEADING_TOP)
-      window.scrollTo({ top: target, behavior: 'smooth' })
-    } else {
-      el.scrollIntoView({ behavior: 'smooth', block: 'start' })
-    }
+    document.getElementById(id)?.scrollIntoView({ behavior: 'smooth' })
   }
 
   const refresh = async () => {
@@ -176,10 +161,10 @@ export default function App() {
   }
 
   return <>
-    <Sidebar active={active} onNavigate={nav} />
+    <Sidebar open={open} onClose={() => setOpen(false)} active={active} onNavigate={nav} />
     <main className="main">
       <header className="top">
-        
+        <button className="icon-btn top-menu" onClick={() => setOpen(true)} aria-label="Buka menu"><Menu size={21} /></button>
         <div className="top-location">{location.province || location.city} · {location.name}</div>
         <div className="top-actions">
           <button className="icon-btn" onClick={refresh} disabled={refreshing} aria-label="Perbarui data" title="Perbarui data"><RefreshCw className={refreshing ? 'spin' : ''} size={18} /></button>
