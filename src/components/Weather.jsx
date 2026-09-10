@@ -1,4 +1,4 @@
-import { Cloud, Wind, Droplets, Eye, Umbrella, Gauge } from 'lucide-react'
+
 import { timeWIB, weatherIcon, activityScore } from '../utils/format'
 
 export default function Weather({ data, location, loading, error }) {
@@ -14,14 +14,6 @@ export default function Weather({ data, location, loading, error }) {
             <div className="place">{location.province || location.city} · {location.name}</div>
             <div className="temp">{first?.t ?? '—'}°</div>
             <div className="weather-name">{first?.weather_desc || (loading ? 'Memuat cuaca…' : 'Data belum tersedia')}</div>
-            <div className="stats">
-              <Stat icon={<Droplets />} value={first?.hu != null ? `${first.hu}%` : '—'} label="Kelembapan" />
-              <Stat icon={<Wind />} value={first?.ws != null ? `${first.ws} km/j` : '—'} label="Angin" />
-              <Stat icon={<Eye />} value={first?.vs_text || '—'} label="Visibilitas" />
-              <Stat icon={<Cloud />} value={first?.tcc != null ? `${first.tcc}%` : '—'} label="Awan" />
-              <Stat icon={<Umbrella />} value={first?.tp != null ? `${first.tp} mm` : '—'} label="Hujan" />
-              <Stat icon={<Gauge />} value={first?.wd || '—'} label="Arah angin" />
-            </div>
           </>}
         </div>
         <div className="current-side"><div className="kicker">Kesiapan aktivitas</div><div className={`status-big ${score.tone}`}>{score.label}</div><p>{score.detail}</p></div>
@@ -38,6 +30,5 @@ export default function Weather({ data, location, loading, error }) {
   </>
 }
 
-function Stat({ icon, value, label }) { return <div className="stat"><span>{icon}</span><b>{value}</b><small>{label}</small></div> }
 function SectionHead({ title, note }) { return <div className="section-head"><h2>{title}</h2><span>{note}</span></div> }
 export { SectionHead }
