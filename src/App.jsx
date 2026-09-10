@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from 'react'
-import { Menu, SunMoon, Activity, ExternalLink, Search, RefreshCw } from 'lucide-react'
+import { SunMoon, Activity, ExternalLink, Search, RefreshCw } from 'lucide-react'
 import Sidebar from './components/Sidebar'
 import Hero from './components/Hero'
 import Weather from './components/Weather'
@@ -29,7 +29,6 @@ export default function App() {
   const [loadingQuake, setLoadingQuake] = useState(true)
   const [loadingWarnings, setLoadingWarnings] = useState(true)
   const [weatherError, setWeatherError] = useState(false)
-  const [open, setOpen] = useState(false)
   const [active, setActive] = useState('overview')
   const [refreshing, setRefreshing] = useState(false)
   const [dark, setDark] = useState(() => localStorage.getItem('langitnusa-theme') === 'dark')
@@ -140,11 +139,21 @@ export default function App() {
     if (id === 'about-data') {
       setActive(id)
       setShowAboutData(true)
-      setOpen(false)
       return
     }
     setActive(id)
-    document.getElementById(id)?.scrollIntoView({ behavior: 'smooth' })
+    const el = document.getElementById(id)
+    if (!el) return
+
+    if (window.matchMedia('(max-width: 850px)').matches) {
+      // Keep the section heading visible below the 66px header + 48px nav.
+      // The mobile section itself has 63px top padding, so 205px gives
+      // the same visual position as a natural scroll into the section.
+      const target = Math.max(0, el.getBoundingClientRect().top + window.scrollY - 205)
+      window.scrollTo({ top: target, behavior: 'smooth' })
+    } else {
+      el.scrollIntoView({ behavior: 'smooth' })
+    }
   }
 
   const refresh = async () => {
@@ -161,10 +170,10 @@ export default function App() {
   }
 
   return <>
-    <Sidebar open={open} onClose={() => setOpen(false)} active={active} onNavigate={nav} />
+    <Sidebar active={active} onNavigate={nav} />
     <main className="main">
       <header className="top">
-        <button className="icon-btn top-menu" onClick={() => setOpen(true)} aria-label="Buka menu"><Menu size={21} /></button>
+        
         <div className="top-location">{location.province || location.city} · {location.name}</div>
         <div className="top-actions">
           <button className="icon-btn" onClick={refresh} disabled={refreshing} aria-label="Perbarui data" title="Perbarui data"><RefreshCw className={refreshing ? 'spin' : ''} size={18} /></button>
