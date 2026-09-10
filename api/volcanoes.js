@@ -35,7 +35,8 @@ const VOLCANOES = [
   ['Lokon', 'Sulawesi Utara', 1580, 1.36, 124.79, 'Stratovolcano', 'Tomohon · Minahasa'],
   ['Gamalama', 'Maluku Utara', 1715, 0.80, 127.33, 'Stratovolcano', 'Ternate'],
   ['Ibu', 'Maluku Utara', 1325, 1.49, 127.63, 'Stratovolcano', 'Halmahera Barat'],
-  ['Dukono', 'Maluku Utara', 1229, 1.69, 127.89, 'Stratovolcano', 'Halmahera Utara']
+  ['Dukono', 'Maluku Utara', 1229, 1.69, 127.89, 'Stratovolcano', 'Halmahera Utara'],
+  ['Sinabung', 'Sumatera Utara', 2460, 3.17, 98.39, 'Stratovolcano', 'Karo']
 ]
 
 function normalize(s) {
@@ -57,27 +58,43 @@ function stripHtml(html) {
     .replace(/&amp;/gi, '&')
     .replace(/&#39;/gi, "'")
     .replace(/&quot;/gi, '"')
+    .replace(/&#x27;/gi, "'")
     .replace(/\r/g, '')
 }
 
-function parseStatuses(text) {
-  const clean = text.replace(/[ \t]+/g, ' ').replace(/\n +/g, '\n')
-  const statusMap = {}
-  const levels = [
-    { level: 4, label: 'Awas', re: /Level IV\s*-\s*\(Awas\)([\s\S]*?)(?=Level III\s*-\s*\(Siaga\)|$)/i },
-    { level: 3, label: 'Siaga', re: /Level III\s*-\s*\(Siaga\)([\s\S]*?)(?=Level II\s*-\s*\(Waspada\)|$)/i },
-    { level: 2, label: 'Waspada', re: /Level II\s*-\s*\(Waspada\)([\s\S]*?)(?=Level I\s*-\s*\(Normal\)|$)/i },
-    { level: 1, label: 'Normal', re: /Level I\s*-\s*\(Normal\)([\s\S]*?)(?=Selamat Datang di MAGMA|$)/i }
+function parseStatuses(html) {
+  const text = stripHtml(html)
+    .replace(/\u00a0/g, ' ')
+    .replace(/[ \t]+/g, ' ')
+    .replace(/\n[ \t]+/g, '\n')
+
+  const headings = [
+    { level: 4, label: 'Awas', marker: 'Level IV - (Awas)' },
+    { level: 3, label: 'Siaga', marker: 'Level III - (Siaga)' },
+    { level: 2, label: 'Waspada', marker: 'Level II - (Waspada)' },
+    { level: 1, label: 'Normal', marker: 'Level I - (Normal)' }
   ]
-  for (const item of levels) {
-    const block = clean.match(item.re)?.[1] || ''
+
+  const statusMap = {}
+  const positions = headings
+    .map((h) => ({ ...h, index: text.toLowerCase().indexOf(h.marker.toLowerCase()) }))
+    .filter((h) => h.index >= 0)
+    .sort((a, b) => a.index - b.index)
+
+  for (let i = 0; i < positions.length; i += 1) {
+    const current = positions[i]
+    const end = positions[i + 1]?.index ?? text.length
+    const block = text.slice(current.index, end)
     for (const volcano of VOLCANOES) {
-      const n = normalize(volcano[0])
-      if (new RegExp(`(?:^|\\n|[·,])\\s*${n.replace(/ /g, '\\s+')}(?:\\s*[-–·]|\\s*$)`, 'im').test(block) || normalize(block).includes(n)) {
-        statusMap[n] = { level: item.level, label: item.label }
+      const name = normalize(volcano[0])
+      if (!name) continue
+      const pattern = new RegExp(`(?:^|\\s)${name.replace(/ /g, '\\s+')}(?:\\s|$)`, 'i')
+      if (pattern.test(normalize(block))) {
+        statusMap[name] = { level: current.level, label: current.label }
       }
     }
   }
+
   return statusMap
 }
 
@@ -86,7 +103,7 @@ export default async function handler(req, res) {
     const response = await fetch(MAGMA_URL, { headers: { 'User-Agent': 'LangitNusa/1.0' } })
     if (!response.ok) throw new Error(`MAGMA ${response.status}`)
     const html = await response.text()
-    const statusMap = parseStatuses(stripHtml(html))
+    const statusMap = parseStatuses(html)
     const lat = Number(req.query?.lat)
     const lon = Number(req.query?.lon)
     const sorted = VOLCANOES.map(([name, region, elevation, vlat, vlon, type, area]) => ({
